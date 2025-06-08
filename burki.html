@@ -202,17 +202,14 @@
         const toggleOnSound = document.getElementById('toggleOnSound');
         const toggleOffSound = document.getElementById('toggleOffSound');
         
-        let switchOrder = []; // Açılış sırasını takip etmek için
-        
+        let switchOrder = [];
+        let schoolSwitchActivated = false;
+
         function playToggleSound(isOn) {
             try {
-                if (isOn) {
-                    toggleOnSound.currentTime = 0; // Sesi başa sar
-                    toggleOnSound.play();
-                } else {
-                    toggleOffSound.currentTime = 0; // Sesi başa sar
-                    toggleOffSound.play();
-                }
+                const sound = isOn ? toggleOnSound : toggleOffSound;
+                sound.currentTime = 0;
+                sound.play();
             } catch (e) {
                 console.log("Ses çalma hatası:", e);
             }
@@ -222,29 +219,61 @@
             const switches = [schoolSwitch, moneySwitch, lifeSwitch];
             const checkedSwitches = switches.filter(sw => sw.checked);
             
-            // Tıklanan switch'in önceki durumunu kaydet
-            const wasChecked = clickedSwitch.checked;
+            // School switch özel durumları
+            if (clickedSwitch === schoolSwitch) {
+                // İlk açılış
+                if (clickedSwitch.checked && !schoolSwitchActivated) {
+                    schoolSwitchActivated = true;
+                    playToggleSound(true);
+                    switchOrder.push(schoolSwitch);
+                    return;
+                }
+                
+                // Kapatma girişimi
+                if (!clickedSwitch.checked && schoolSwitchActivated) {
+                    playToggleSound(false);
+
+                    setTimeout(() => {
+                        schoolSwitch.checked = true;
+                        playToggleSound(true);
+                        
+                        // Eğer 3 switch de açıksa, en eski diğer switch'i kapat
+                        if (checkedSwitches.length === 3) {
+                            const otherSwitches = switchOrder.filter(sw => sw !== schoolSwitch);
+                            if (otherSwitches.length > 0) {
+                                const oldestOtherSwitch = otherSwitches[0];
+                                oldestOtherSwitch.checked = false;
+                                switchOrder = switchOrder.filter(sw => sw !== oldestOtherSwitch);
+                                playToggleSound(false);
+                            }
+                        }
+                    }, 250);
+                    return;
+                }
+            }
             
+            // Normal switch işlemleri
             if (clickedSwitch.checked) {
-                // Eğer switch açılıyorsa, sıraya ekle
                 if (!switchOrder.includes(clickedSwitch)) {
                     switchOrder.push(clickedSwitch);
                 }
                 playToggleSound(true);
+                
+                // 3 switch açık olma kontrolü
+                if (checkedSwitches.length > 2) {
+                    // School switch hariç en eski olanı bul
+                    const availableSwitches = switchOrder.filter(sw => sw !== schoolSwitch);
+                    const oldestSwitch = availableSwitches[0];
+                    
+                    if (oldestSwitch) {
+                        oldestSwitch.checked = false;
+                        switchOrder = switchOrder.filter(sw => sw !== oldestSwitch);
+                        playToggleSound(false);
+                    }
+                }
             } else {
-                // Eğer switch kapanıyorsa, sıradan çıkar
                 switchOrder = switchOrder.filter(sw => sw !== clickedSwitch);
                 playToggleSound(false);
-            }
-            
-            if (checkedSwitches.length > 2) {
-                // Eğer 3 switch de açıksa, en eski açık olanı kapat
-                const oldestSwitch = switchOrder[0];
-                if (oldestSwitch && oldestSwitch !== clickedSwitch) {
-                    oldestSwitch.checked = false;
-                    switchOrder = switchOrder.filter(sw => sw !== oldestSwitch);
-                    playToggleSound(false); // Otomatik kapanan switch için ses
-                }
             }
         }
         
