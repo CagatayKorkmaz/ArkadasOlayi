@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Atakanın Zaman Ayırdığı Şeyler</title>
+    <style>
+        @font-face {
+            font-family: 'AgencyFB';
+            src: url('content/AGENCYB.woff2') format('woff2'),
+                 url('content/AGENCYB.woff') format('woff');
+        }
+
+        body {
+            font-family: 'AgencyFB', 'Gill Sans', 'Gill Sans MT', sans-serif;
+            background-image: url('content/bg2.jpg');
+            background-size: cover;
+            background-color: #757272;
+            margin: 0;
+        }
+        main {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            background-color: #111111;
+            padding: 50px;
+            border-radius: 10px;
+            box-shadow: 0 60px 80px rgba(0,0,0,0.60), 0 45px 26px rgba(0,0,0,0.14);
+            text-align: center;
+            width: 28vw;
+            margin-bottom: 55px;
+        }
+        .container span {
+            color: #ccc;
+            font-size: 1.8vw;
+            font-weight: bold;
+        }
+        
+        h1 {
+            margin-bottom: 105px;
+            color: #fff;
+            font-size: 3.3vw;
+        }
+
+        .back a {
+            background-color: #111;
+            padding: 10px 30px;
+            border-radius: 10px;
+            margin-bottom: 50px;
+            transition: 0.3s ease;
+            box-shadow: 0px 25px 20px -20px rgba(0, 0, 0, 0.45);
+            border: #111 2px solid;
+        }
+        .back a:hover {
+            border: #fff 2px solid;
+        }   
+        .switch-container {
+            margin-bottom: 20px;
+        }
+        
+        .switch-label {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+        
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: .4s;
+            border-radius: 34px;
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: .4s;
+            border-radius: 50%;
+        }
+        
+        input:checked + .slider {
+            background-color: #2196F3;
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        @media (max-width: 1054px) {
+            body {
+                background-image: url('content/bg-dikey.jpg');
+                background-size: cover;
+            }
+            .container {
+                width: 80vw;
+                padding: 20px;
+            }
+            .container span {
+                font-size: 6vw;
+            }
+            h1 {
+                font-size: 10vw;
+            }
+
+            .switch {
+                width: 38px;
+                height: 23px;
+            }
+            .slider:before {
+                height: 15px;
+                width: 15px;
+                left: 4px;
+                bottom: 4px;
+            }
+            input:checked + .slider:before {
+                transform: translateX(15px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <section>
+            <div class="container">
+                <h1>Ato'nun Zaman Ayırabileceği Şeyler</h1>
+                
+                <div class="switch-container">
+                    <div class="switch-label">
+                        <span>Manitaya</span>
+                        <label class="switch">
+                            <input type="checkbox" id="school">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="switch-container">
+                    <div class="switch-label">
+                        <span>Agalarla Discorda</span>
+                        <label class="switch">
+                            <input type="checkbox" id="money">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="switch-container">
+                    <div class="switch-label">
+                        <span>Spora + Okula + Uykuya</span>
+                        <label class="switch">
+                            <input type="checkbox" id="life">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </section>
+        <div class="back">
+            <a href="index.html" style="color: #fff; text-decoration: none; font-size: 24px;">Geri Dön</a>
+        </div>
+    </main>
+
+    <!-- Ses Olayı -->
+    <audio id="toggleOnSound" src="content/sound.mp3" preload="auto"></audio>
+    <audio id="toggleOffSound" src="content/sound.mp3" preload="auto"></audio>
+
+    <script>
+        const schoolSwitch = document.getElementById('school');
+        const moneySwitch = document.getElementById('money');
+        const lifeSwitch = document.getElementById('life');
+        const toggleOnSound = document.getElementById('toggleOnSound');
+        const toggleOffSound = document.getElementById('toggleOffSound');
+        
+        let switchOrder = []; // Açılış sırasını takip etmek için
+        
+        function playToggleSound(isOn) {
+            try {
+                if (isOn) {
+                    toggleOnSound.currentTime = 0; // Sesi başa sar
+                    toggleOnSound.play();
+                } else {
+                    toggleOffSound.currentTime = 0; // Sesi başa sar
+                    toggleOffSound.play();
+                }
+            } catch (e) {
+                console.log("Ses çalma hatası:", e);
+            }
+        }
+        
+        function updateSwitches(clickedSwitch) {
+            const switches = [schoolSwitch, moneySwitch, lifeSwitch];
+            const checkedSwitches = switches.filter(sw => sw.checked);
+            
+            // Tıklanan switch'in önceki durumunu kaydet
+            const wasChecked = clickedSwitch.checked;
+            
+            if (clickedSwitch.checked) {
+                // Eğer switch açılıyorsa, sıraya ekle
+                if (!switchOrder.includes(clickedSwitch)) {
+                    switchOrder.push(clickedSwitch);
+                }
+                playToggleSound(true);
+            } else {
+                // Eğer switch kapanıyorsa, sıradan çıkar
+                switchOrder = switchOrder.filter(sw => sw !== clickedSwitch);
+                playToggleSound(false);
+            }
+            
+            if (checkedSwitches.length > 2) {
+                // Eğer 3 switch de açıksa, en eski açık olanı kapat
+                const oldestSwitch = switchOrder[0];
+                if (oldestSwitch && oldestSwitch !== clickedSwitch) {
+                    oldestSwitch.checked = false;
+                    switchOrder = switchOrder.filter(sw => sw !== oldestSwitch);
+                    playToggleSound(false); // Otomatik kapanan switch için ses
+                }
+            }
+        }
+        
+        schoolSwitch.addEventListener('change', () => updateSwitches(schoolSwitch));
+        moneySwitch.addEventListener('change', () => updateSwitches(moneySwitch));
+        lifeSwitch.addEventListener('change', () => updateSwitches(lifeSwitch));
+    </script>
+</body>
+</html>
