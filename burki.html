@@ -277,6 +277,19 @@
             }
         }
         
+        // Sayfa yüklendiğinde başlangıçta kapalı, 2.5 saniye sonra otomatik aç
+        document.addEventListener('DOMContentLoaded', function() {
+            schoolSwitch.checked = false; // Başlangıçta kapalı
+            schoolSwitchActivated = false;
+            
+            setTimeout(() => {
+                schoolSwitch.checked = true;
+                schoolSwitchActivated = true;
+                switchOrder.push(schoolSwitch);
+                playToggleSound(true);
+            }, 500); // Gecikme süresi milisaniye
+        });
+        
         schoolSwitch.addEventListener('change', () => updateSwitches(schoolSwitch));
         moneySwitch.addEventListener('change', () => updateSwitches(moneySwitch));
         lifeSwitch.addEventListener('change', () => updateSwitches(lifeSwitch));
