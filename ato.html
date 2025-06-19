@@ -137,6 +137,9 @@
             h1 {
                 font-size: 10vw;
             }
+            h2 {
+                font-size: 3.6vw;
+            }
 
             .switch {
                 width: 38px;
@@ -196,6 +199,23 @@
             <a href="index.html" style="color: #fff; text-decoration: none; font-size: 24px;">Geri Dön</a>
         </div>
     </main>
+
+    <div id="notification" style="
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        background: #333;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0,0,0,0.4);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+        pointer-events: none;
+        z-index: 9999;
+        ">
+        Bildiriminiz burada!
+    </div>
 
     <!-- Ses Olayı -->
     <audio id="toggleOnSound" src="content/sound.mp3" preload="auto"></audio>
@@ -332,6 +352,45 @@
 
     setInterval(updateMessage, 1000);
     fetchLastDrinkTime();
+
+    window.addTime = async function ({ days = 0, hours = 0, minutes = 0, seconds = 0 }) { // addTime({ hours: 3 }); 
+        const newTime = new Date(lastDrinkTime);
+        newTime.setSeconds(newTime.getSeconds() - seconds);
+        newTime.setMinutes(newTime.getMinutes() - minutes);
+        newTime.setHours(newTime.getHours() - hours);
+        newTime.setDate(newTime.getDate() - days);
+
+        await supabase
+        .from("global_timer")
+        .update({ last_drink_time: newTime.toISOString() })
+        .eq("id", 1);
+
+        lastDrinkTime = newTime;
+        updateMessage();
+
+        const msg = `Zaman güncellendi: ${days}g ${hours}s ${minutes}dk ${seconds}sn eklendi.`;
+        showNotification(msg);
+    };
+
+    window.subtractTime = async function ({ days = 0, hours = 0, minutes = 0, seconds = 0 }) { // subtractTime({ hours: 3 });
+        const msg = `Zaman güncellendi: -${days}g -${hours}s -${minutes}dk -${seconds}sn çıkarıldı.`;
+        await window.addTime({
+        days: + days,
+        hours: + hours,
+        minutes: + minutes,
+        seconds: + seconds,
+        });
+        showNotification(msg);
+    };
+
+    function showNotification(message) {
+        const notif = document.getElementById("notification");
+        notif.textContent = message;
+        notif.style.opacity = "1";
+        setTimeout(() => {
+        notif.style.opacity = "0";
+        }, 3000); // 3 saniye göster
+    }
   </script>
 </body>
 </html>
