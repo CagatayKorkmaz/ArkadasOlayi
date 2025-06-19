@@ -43,9 +43,14 @@
         }
         
         h1 {
-            margin-bottom: 105px;
+            /* margin-bottom: 105px; */
             color: #fff;
             font-size: 3.3vw;
+        }
+        h2 {
+            color: #ccc;
+            font-size: 1.2vw;
+            margin-bottom: 80px;
         }
 
         .back a {
@@ -154,6 +159,7 @@
         <section>
             <div class="container">
                 <h1>Ato'nun Zaman Ayırabileceği Şeyler</h1>
+                <h2 id="message">Yükleniyor...</h1>
                 
                 <div class="switch-container">
                     <div class="switch-label">
@@ -252,5 +258,80 @@
         moneySwitch.addEventListener('change', () => updateSwitches(moneySwitch));
         lifeSwitch.addEventListener('change', () => updateSwitches(lifeSwitch));
     </script>
+
+      <script type="module">
+    import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+
+    const SUPABASE_URL = 'https://senin-url.supabase.co'; // Değiştir
+    const SUPABASE_KEY = 'public-anon-key'; // Değiştir
+    const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    let lastDrinkTime = null;
+
+    async function fetchLastDrinkTime() {
+      const { data } = await supabase
+        .from("global_timer")
+        .select("last_drink_time")
+        .eq("id", 1)
+        .single();
+
+      if (data) {
+        lastDrinkTime = new Date(data.last_drink_time);
+        updateMessage();
+      } else {
+        await supabase.from("global_timer").insert([{ id: 1 }]);
+        lastDrinkTime = new Date();
+        updateMessage();
+      }
+    }
+
+    function updateMessage() {
+        if (!lastDrinkTime) return;
+
+        const now = new Date();
+        const diffMs = now - lastDrinkTime;
+
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const days = Math.floor(totalSeconds / 86400);
+        const hours = Math.floor((totalSeconds % 86400) / 3600);
+        const minutes = Math.floor((totalSeconds % 3600) / 60);
+        const seconds = totalSeconds % 60;
+
+        let readable = "";
+
+        if (days > 0) {
+            readable = `${days} gün ${hours} saat ${minutes} dakika ${seconds} saniyedir Atakan dc'ye Gelmedi.`;
+        } else if (hours > 0) {
+            readable = `${hours} saat ${minutes} dakika ${seconds} saniyedir Atakan dc'ye Gelmedi.`;
+        } else if (minutes > 0) {
+            readable = `${minutes} dakika ${seconds} saniyedir Atakan dc'ye Gelmedi.`;
+        } else {
+            readable = `${seconds} saniyedir Atakan dc'ye Gelmedi.`;
+        }
+
+        document.getElementById("message").textContent = readable;
+    }
+
+    async function resetDrinkTime() {
+      const now = new Date().toISOString();
+      await supabase
+        .from("global_timer")
+        .update({ last_drink_time: now })
+        .eq("id", 1);
+      lastDrinkTime = new Date(now);
+      updateMessage();
+      alert("Sayaç sıfırlandı!"); // İstersen kaldır
+    }
+
+    // 👇 Shift + L kombinasyonunu dinle
+    document.addEventListener("keydown", (e) => {
+      if (e.shiftKey && e.key.toLowerCase() === "l") {
+        resetDrinkTime();
+      }
+    });
+
+    setInterval(updateMessage, 1000);
+    fetchLastDrinkTime();
+  </script>
 </body>
 </html>
